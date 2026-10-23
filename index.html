@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Goldschmidt Levi - local archive</title>
+<p id="status">Loading the local website archive...</p>
+<script>
+  navigator.serviceWorker.register("/mirror-sw.js")
+    .then(() => navigator.serviceWorker.ready)
+    .then(() => {
+      if (navigator.serviceWorker.controller) {
+        location.reload();
+      } else {
+        navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), {once: true});
+      }
+    })
+    .catch(error => {
+      document.getElementById("status").textContent = "Cannot load local archive: " + error.message;
+    });
+</script>
+</html>

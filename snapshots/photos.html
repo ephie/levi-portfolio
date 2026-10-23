@@ -1,0 +1,191 @@
+<!DOCTYPE html><html lang="en"><head>
+  <script>
+   (function () {
+  var proto = XMLHttpRequest.prototype;
+  var open = proto.open, setRequestHeader = proto.setRequestHeader, send = proto.send;
+  var TOKEN_KEY = 'base44_access_token';
+  var storedTokenHeader = function () {
+    try { return 'Bearer ' + localStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
+  };
+  var forgetStoredToken = function () {
+    try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem('token'); } catch (e) {}
+  };
+
+  proto.open = function (method, url) {
+    this.__b44IsAuthCheck = /\/entities\/User\/me(\?|$)/.test(url);
+    return open.apply(this, arguments);
+  };
+
+  proto.setRequestHeader = function (name, value) {
+    if (this.__b44IsAuthCheck && name.toLowerCase() === 'authorization' && value === storedTokenHeader()) {
+      this.__b44SentToken = value;
+    }
+    return setRequestHeader.call(this, name, value);
+  };
+
+  proto.send = function () {
+    this.addEventListener('loadend', function () {
+      var rejectedTokenStillStored = this.status === 401 && this.__b44SentToken === storedTokenHeader();
+      if (rejectedTokenStillStored) forgetStoredToken();
+    });
+    return send.apply(this, arguments);
+  };
+})();
+  </script>
+  <meta charset="utf-8">
+  <link href="https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png/v1/fit/w_180,h_180/d0fd4840f_logo.png" rel="icon" type="image/svg+xml">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link href="/manifest.json" rel="manifest">
+  <title>
+   Photos | GOLDSCHMIDT LEVI
+  </title>
+  <script crossorigin="" src="/assets/index-WnwMogxS.js" type="module">
+  </script>
+  <link crossorigin="" href="/assets/index-CqhYnEMg.css" rel="stylesheet">
+  <script type="module">
+   if (window.self === window.top) {
+  let lastPath = "";
+  function getPageNameFromPath(path) {
+    const segments = path.split("/").filter(Boolean);
+    return segments[0] || null;
+  }
+  function trackPageView() {
+    const path = window.location.pathname;
+    if (path === lastPath) return;
+    lastPath = path;
+    const pageName = getPageNameFromPath(path) || "home";
+    const appId = "6a188961cb313af9686e2905";
+    if (!appId) return;
+    fetch(`/api/app-logs/${appId}/log-user-in-app/${pageName}`, {
+      method: "POST",
+    }).catch(() => {});
+  }
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = function (...args) {
+    originalPushState(...args);
+    trackPageView();
+  };
+  const originalReplaceState = history.replaceState.bind(history);
+  history.replaceState = function (...args) {
+    originalReplaceState(...args);
+    trackPageView();
+  };
+  window.addEventListener("popstate", trackPageView);
+  trackPageView();
+}
+  </script>
+  <meta content="Photos on GOLDSCHMIDT LEVI. A high-precision, brutalist digital portfolio for architects to showcase their." name="description">
+  <meta content="Photos | GOLDSCHMIDT LEVI" property="og:title">
+  <meta content="Photos on GOLDSCHMIDT LEVI. A high-precision, brutalist digital portfolio for architects to showcase their." property="og:description">
+  <meta content="https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png/v1/fill/w_1200,h_630/d0fd4840f_logo.png" property="og:image">
+  <meta content="https://goldschmidt-levi.base44.app/photos" property="og:url">
+  <meta content="website" property="og:type">
+  <meta content="GOLDSCHMIDT LEVI" property="og:site_name">
+  <meta content="Photos | GOLDSCHMIDT LEVI" name="twitter:title">
+  <meta content="Photos on GOLDSCHMIDT LEVI. A high-precision, brutalist digital portfolio for architects to showcase their." name="twitter:description">
+  <meta content="https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png/v1/fill/w_1200,h_630/d0fd4840f_logo.png" name="twitter:image">
+  <meta content="summary_large_image" name="twitter:card">
+  <meta content="https://goldschmidt-levi.base44.app/photos" name="twitter:url">
+  <script>
+   (function () {
+  var titles = {"/": "GOLDSCHMIDT LEVI", "/projets": "ArchiMonograph", "/contact": "Contact | GOLDSCHMIDT LEVI", "/photos": "Photos | GOLDSCHMIDT LEVI", "/videos": "Videos | GOLDSCHMIDT LEVI", "/smartrun": "Smart Run | GOLDSCHMIDT LEVI", "/cv": "GOLDSCHMIDT LEVI"};
+  // PascalCase boundaries -> "-", mirroring _PASCAL_BOUNDARY_RE without lookbehind
+  // (old Safari fails to PARSE a lookbehind, taking the whole script down).
+  var dashed = function (s) {
+    return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/([A-Z])([A-Z][a-z])/g, "$1-$2");
+  };
+  var decode = function (s) {
+    // A %2F inside ONE segment must not become a structural separator: /blog/foo%2Fbar is a
+    // dynamic slug, and letting it split would match a static /blog/foo/bar and write ITS title.
+    try { var d = decodeURIComponent(s); return d.indexOf("/") < 0 ? d : s; } catch (e) { return s; }
+  };
+  var segments = function (path) { return path.split("/").filter(Boolean).map(decode); };
+  var norm = function (path) {
+    var parts = segments(path).map(function (s) { return dashed(s).toLowerCase(); });
+    return parts.length ? "/" + parts.join("/") : "/";
+  };
+  var lastPath = location.pathname, written = document.title, on = true;
+  var sync = function () {
+    // Path only: a hash/query change is the same page, and the SDK strips its own auth
+    // params with replaceState -- neither must clobber a server-rendered title in place.
+    if (!on || location.pathname === lastPath) return;
+    lastPath = location.pathname;
+    if (document.title !== written) { on = false; return; }
+    // Write ONLY a title the map proves. An unmapped path is a dynamic route (/blog/:slug) the
+    // map cannot carry, and writing a placeholder there is destructive, not merely vague: the
+    // prerender worker runs no setUserAgent, so its capture browser reads as human and executes
+    // this script, and coordinator.js's settle wait explicitly tolerates a full navigation --
+    // a redirect landing on an unmapped path would bake the placeholder into the stored
+    // snapshot. Leaving the title alone degrades to today's behavior instead.
+    // Exact lookup only. A dash-stripped retry here would let a genuinely different /set-up
+    // claim /setup: the map carries a dash-free key only where a PascalCase boundary put the
+    // dashes there, and the client cannot tell the two apart. The map emits every reachable
+    // shape per segment instead (_client_url_variants).
+    var title = titles[norm(location.pathname)];
+    if (title === undefined) return;
+    document.title = title;
+    // Re-read: the setter stores verbatim but the getter strips and collapses whitespace, so
+    // keeping the assigned string would make the next sync() read our own write as the app's.
+    written = document.title;
+  };
+  var wrap = function (fn) {
+    // The history entry is already pushed by the time sync() runs, so a throw here would
+    // surface inside the host app's router and break navigation. This is injected into apps
+    // we cannot test, so it swallows rather than trusting the trace.
+    return function () {
+      var r = fn.apply(this, arguments);
+      try { sync(); } catch (e) {}
+      return r;
+    };
+  };
+  history.pushState = wrap(history.pushState);
+  history.replaceState = wrap(history.replaceState);
+  window.addEventListener("popstate", sync);
+})();
+  </script>
+  <meta content="yes" name="mobile-web-app-capable">
+  <meta content="black" name="apple-mobile-web-app-status-bar-style">
+  <meta content="GOLDSCHMIDT LEVI" name="apple-mobile-web-app-title">
+  <link href="https://goldschmidt-levi.base44.app/photos" rel="canonical">
+  <script data-seo-source="builder" type="application/ld+json">
+   {"name": "GOLDSCHMIDT LEVI", "@context": "https://schema.org", "@type": "WebSite", "url": "https://goldschmidt-levi.base44.app"}
+  </script>
+  <script data-seo-source="builder" type="application/ld+json">
+   {"name": "GOLDSCHMIDT LEVI", "logo": "https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png", "@context": "https://schema.org", "@type": "Organization", "url": "https://goldschmidt-levi.base44.app"}
+  </script>
+  <script data-seo-source="builder" type="application/ld+json">
+   {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://goldschmidt-levi.base44.app/"}, {"@type": "ListItem", "position": 2, "name": "Photos", "item": "https://goldschmidt-levi.base44.app/photos"}]}
+  </script>
+  <script async="true" data-app-id="6a188961cb313af9686e2905" data-platform-url="https://app.base44.com" src="/static/js/badge.js">
+  </script>
+ </head>
+ <body>
+  <div id="root"><div class="min-h-screen bg-background text-foreground"><header class="fixed top-0 left-0 right-0 z-50 bg-background"><div class="flex flex-col items-center pt-3 pb-1 px-[6vw]"><a class="font-display tracking-[0.15em] md:tracking-[0.25em] uppercase text-2xl" href="/">GOLDSCHMIDT LEVI</a><nav class="flex items-center justify-center mt-3 gap-6"><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-muted-foreground" href="/projets">PROJETS</a><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-foreground" href="/photos">PHOTOS</a><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-muted-foreground" href="/videos">VIDÉOS</a><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-muted-foreground" href="/cv">CV</a></nav></div></header><main class="pt-[80px]"><div><div class="h-0"></div><div id="Architecture" class="scroll-mt-[80px]"><section class="px-[6vw] pt-4 pb-12"><div class="mb-4"><span class="font-display text-sm tracking-[0.2em] uppercase">Architecture</span></div><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6"><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/e49c2fa8c_73.jpg" alt="Versailles" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/7bcd4fafe_76.jpg" alt="Versailles" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/0d8c7a9d5_71.jpg" alt="Versailles" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/9a823a920_72.jpg" alt="Versailles" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/43139d9ec_64.jpg" alt="Immeubles modernes" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/e044339df_60.jpg" alt="Rue parisienne" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/cbc930ebf_58.jpg" alt="Facades et palmiers" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/d9031e1c2_67.jpg" alt="Facade vitrée" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/acf225c2d_66.jpg" alt="Composition architecturale" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/32e9c8bc2_17.png" alt="Immeuble Singapour" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/ec5401197_20.png" alt="Immeuble Singapour" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/9fbe7c4d5_19.png" alt="Immeuble Singapour Mastercard" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/5bac124ef_21.png" alt="Immeuble Singapour" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/a172baaa1_22.png" alt="Immeuble 16ème Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/7be18507f_16.png" alt="Mosquée de Singapour" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/70977e88c_15.png" alt="Hôtel Singapour" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/b7e9a6df1_13.png" alt="Philharmonie de Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/435d946a3_14.png" alt="Philharmonie de Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/c70c5daa6_12.png" alt="Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/1d9a6daa8_6.png" alt="La Défense Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/d980018d1_5.png" alt="La Défense Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/b27a26a3f_7.png" alt="La Défense Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/c10fa272b_9.png" alt="La Défense Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/eb9536331_8.png" alt="La Défense Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/26e1f8c9d_10.png" alt="La Défense Paris" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/fed059732_1.png" alt="Tour Triangle" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/71a90bf92_2.png" alt="Tour Triangle" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/2dd090a32_3.png" alt="Tour Triangle" class="w-full h-full object-cover pointer-events-none"></div></div></div></section></div><div id="2026" class="scroll-mt-[80px]"><section class="px-[6vw] pt-4 pb-12"><div class="mb-4"><span class="font-display text-sm tracking-[0.2em] uppercase">2026</span></div><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6"><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/673db9867_79.jpg" alt="Tour Eiffel dans la brume" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/fb6af6898_62.jpg" alt="Porte et roue" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/0c0192624_51.jpg" alt="Motos vintage" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/7610d807f_42.png" alt="Mouettes &amp; Cormorans" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/2c0d5c1e5_38.png" alt="Voilier &amp; Ponton" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/cc10eda76_36.png" alt="Soirée à la fenêtre" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/2b970509f_34.png" alt="Ferme &amp; Drapeaux" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/d804b0c80_31.png" alt="Lac turquoise" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/77e9abe01_29.png" alt="Textures de bois" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/ca4e72cb0_28.png" alt="Oiseaux" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/8d9f7b11f_27.png" alt="Village lacustre" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/33946bf38_24.png" alt="PSG" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/965918922_26.png" alt="PSG" class="w-full h-full object-cover pointer-events-none"></div></div></div></section></div><div id="A1387" class="scroll-mt-[80px]"><section class="px-[6vw] pt-4 pb-12"><div class="mb-4"><span class="font-display text-sm tracking-[0.2em] uppercase">A1387</span></div><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6"><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/624cf8c69_MD235FDA.jpg" alt="Seine et Institut" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><video src="https://media.base44.com/videos/public/6a188961cb313af9686e2905/64241081a_download.mp4" class="w-full h-full object-cover pointer-events-none" autoplay="" loop="" playsinline=""></video></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/ceba3dc4e_48.png" alt="Fête foraine &amp; Jardins" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/1f4581dad_46.png" alt="Genève" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/dc490f0dd_41.png" alt="Plage du Léman" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/77880b8eb_32.png" alt="Saule pleureur" class="w-full h-full object-cover pointer-events-none"></div></div><div class="relative overflow-hidden bg-muted select-none cursor-pointer" style="aspect-ratio: 9 / 16;"><div class="w-full h-full transition-transform duration-700 ease-out" style="transform: scale(1);"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/90f679fab_49.png" alt="Concert" class="w-full h-full object-cover pointer-events-none"></div></div></div></section></div></div></main></div><div class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]"><div class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]"></div></div></div>
+ 
+
+<div id="base44-edit-badge" dir="ltr" style="position: fixed; z-index: 999999; bottom: 16px; right: 16px; display: flex; align-items: center; gap: 8px; background-color: rgb(0, 0, 0); color: rgb(255, 255, 255); padding: 8px 12px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px; cursor: pointer; transition: box-shadow 0.2s; border: 1px solid rgb(38, 38, 38); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif; font-size: 14px;">
+      <img src="https://media.base44.com/images/public/builder-assets/symbol-orange.png" alt="base44" style="width: 20px; height: 20px;">
+      <span style="white-space: nowrap; font-size: 12px;">
+        <span id="badge-content">
+          <div style="display: flex; align-items: center; gap: 6px; justify-content: center; font-size: 14px;">
+            <span>Edit with </span>
+            <span style="margin-bottom: 2px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARAAAABECAMAAAB+vJpyAAAACXBIWXMAACxLAAAsSwGlPZapAAAAAXNSR0IArs4c6QAAAEVQTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////Up1zwgAAABZ0Uk5TABAgMEBQX2BvcH+Aj5CfoK+wv8/f741pbhwAAAVHSURBVHja7ZvtbuwoDECNQ5ZNSZgsAd7/Ufeq6i0Ex3Y6I1WJNOdv3RlyGvAHKrx58+bNmzdvfg0v4OwAN8P5BnH16FsM/KUoxNnCffi3tDgQCKUFqxCd5OAmYCFCdHVUiE5CuAXptBDMohCdD7gBczktJBVVyP2NuNLhBHWaEB0LFwcTESKoe11IMnBtYulxvDpdiI6HS/NRCE5UpwvJqaX05ItnXIoT1elCPOwY3HqfU8QkTQhVpwtRNtsE1yUUTQhVpwtR6pdwi5I9KUJCeUUI+FKJcFUwVx+eCOHULVETomy4dIOSPSMRwqqDZ4QAEXLtjDuBLCQ1Dp4TkoQtg25ev/Jziqu30EAD81fcZIHFjDVwdginsO0xR4Rw6jw8JySXb/6DFvORSs/qgEIDU7CHNlzsAyf8UcmeUBYytn/d54QYJu1iODk7MXMuB8SBHneHgQF/kHFHIEJYdU8KsaUyCIuvzAYabBbjKsNWTimWd4EsZO1+pAqR9ad2EQKbOReYEFTD+uQB2wUSIZy6BX4shD6Q0x6THr5O6Z9PfmI4V7IjEcKqM88JMfNh0h2KwlSTvkjQfOjvyEyWT4Rw6nQhwba4OZaGjMz4bQuLDzHvYs1BlZw+42i7SA3nLcat7Bj1Sc8KVAirThWiM7a5q/J9oeESedewlT0cxcWDdusrJaNLRLGccRkhVF2E14Vke9wdWag8+u3lDncjbqVi+gFnsjVwUadTkTw8FUJLdnxdSESoZG6ZW/f5ayuoYvJ+ydhlqIonr4iQNmQhpAc+LUQtjpCdoTk2zQdo8XujgZ/bRuKeTRusEKruJSFUiWWbG9N968YEDumbpeu3+N40itMrBFGIJerOC9EzH35j2M44dN9nz7ZmfG1phJrRAyuEqntJCNneEtj1ges+dzAsjLY+ozl+0hOBF0LV6UJeN4LjFLbc59OptOQ4j4OYKbLoeOEnPcgJEdXpQrawY41Zr6CNneaYS0+sm0Gz0k7/KN1Lx6QNUQgWRt0TvYx9lBZLhzlCO1O/kFqx5B1QSVzGDSAKMaw6XYh265daG1Hv72xhSQGBjdGFjCRtsEJmou5pIbSutqRbF4WA1/OWLWdhGzVRiCPqXhBCVrzU6lsVohvZ8FkhWE7hyAo0BCGV3L+2Qy5nhYBLYt66pZC1VAzrI62LOxAC+BD0zbcU8igV/D5mK3kLkzXwh+N8b9yaCoMFvLmQbroVlxHhCyqkMox+3QplAUN+ieOSWwb3N1cWGtRnM3Z6dFZy+3npJkJSqRgYSc6R+2Cl2MPWN95CiN3/wsKvP+yFYMWwxZ6FSVoAVsxVhHQz0JV9C3AfCCv7Lk3MqZqN8JH2GkJM2J+BEFkhWyek2Rob+5x2Vy/O/IwwQwvyLHshBnmaFVv8RBNiPnLf3a1ctx5KJ2Ri20K7ux4d2QuY4dRllVS6S+ile/Q7wpoO+qsHc/m9kUrV0GtL6q5uSmrkn0yU/pqQ83tyOlr9MOeD0j0eX1mbWZib1EAbySzmakISuWXLq3duCunMgGibLP5hnDO5L166cUnwYe0M41WE0Nc+ChFkQKSQajcvM8H1hORBm+gkR+8oZbBWJiIeriOEHosLa8xWIcKDkgWrgR6uJ2Qx9VDcGB9AhIgPmh1UzEOKu5YQ2sUtzPUvFQLgtftibZS0IlxLSI6TASCLp8aOhQA+EqtYVZKDBfhdIVFgDd4NBo5wTV5Mi4VPhviXuWtwt04xwiF2aQNTcAZ+jIvfaDKXGmrgdYZx8t670ZyMdv4Pk7MIEsaO02fcYN7/Zf7mzfX5H+WZeZXgxfH6AAAAAElFTkSuQmCC" alt="Base44" height="18" width="56"></span>
+          </div>
+        </span>
+      </span>
+      <button id="badge-close" aria-label="Close badge" style="
+          padding: 2px;
+          margin-left: 2px;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div></body></html>

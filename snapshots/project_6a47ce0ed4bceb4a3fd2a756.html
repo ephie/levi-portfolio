@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="en"><head>
+  <script>
+   (function () {
+  var proto = XMLHttpRequest.prototype;
+  var open = proto.open, setRequestHeader = proto.setRequestHeader, send = proto.send;
+  var TOKEN_KEY = 'base44_access_token';
+  var storedTokenHeader = function () {
+    try { return 'Bearer ' + localStorage.getItem(TOKEN_KEY); } catch (e) { return null; }
+  };
+  var forgetStoredToken = function () {
+    try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem('token'); } catch (e) {}
+  };
+
+  proto.open = function (method, url) {
+    this.__b44IsAuthCheck = /\/entities\/User\/me(\?|$)/.test(url);
+    return open.apply(this, arguments);
+  };
+
+  proto.setRequestHeader = function (name, value) {
+    if (this.__b44IsAuthCheck && name.toLowerCase() === 'authorization' && value === storedTokenHeader()) {
+      this.__b44SentToken = value;
+    }
+    return setRequestHeader.call(this, name, value);
+  };
+
+  proto.send = function () {
+    this.addEventListener('loadend', function () {
+      var rejectedTokenStillStored = this.status === 401 && this.__b44SentToken === storedTokenHeader();
+      if (rejectedTokenStillStored) forgetStoredToken();
+    });
+    return send.apply(this, arguments);
+  };
+})();
+  </script>
+  <meta charset="utf-8">
+  <link href="https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png/v1/fit/w_180,h_180/d0fd4840f_logo.png" rel="icon" type="image/svg+xml">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <link href="/manifest.json" rel="manifest">
+  <title>
+   Project Detail | GOLDSCHMIDT LEVI
+  </title>
+  <script crossorigin="" src="/assets/index-WnwMogxS.js" type="module">
+  </script>
+  <link crossorigin="" href="/assets/index-CqhYnEMg.css" rel="stylesheet">
+  <script type="module">
+   if (window.self === window.top) {
+  let lastPath = "";
+  function getPageNameFromPath(path) {
+    const segments = path.split("/").filter(Boolean);
+    return segments[0] || null;
+  }
+  function trackPageView() {
+    const path = window.location.pathname;
+    if (path === lastPath) return;
+    lastPath = path;
+    const pageName = getPageNameFromPath(path) || "home";
+    const appId = "6a188961cb313af9686e2905";
+    if (!appId) return;
+    fetch(`/api/app-logs/${appId}/log-user-in-app/${pageName}`, {
+      method: "POST",
+    }).catch(() => {});
+  }
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = function (...args) {
+    originalPushState(...args);
+    trackPageView();
+  };
+  const originalReplaceState = history.replaceState.bind(history);
+  history.replaceState = function (...args) {
+    originalReplaceState(...args);
+    trackPageView();
+  };
+  window.addEventListener("popstate", trackPageView);
+  trackPageView();
+}
+  </script>
+  <meta content="Project Detail on GOLDSCHMIDT LEVI. A high-precision, brutalist digital portfolio for architects to showcase their." name="description">
+  <meta content="Project Detail | GOLDSCHMIDT LEVI" property="og:title">
+  <meta content="Project Detail on GOLDSCHMIDT LEVI. A high-precision, brutalist digital portfolio for architects to showcase their." property="og:description">
+  <meta content="https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png/v1/fill/w_1200,h_630/d0fd4840f_logo.png" property="og:image">
+  <meta content="https://goldschmidt-levi.base44.app/project/6a47ce0ed4bceb4a3fd2a756" property="og:url">
+  <meta content="website" property="og:type">
+  <meta content="GOLDSCHMIDT LEVI" property="og:site_name">
+  <meta content="Project Detail | GOLDSCHMIDT LEVI" name="twitter:title">
+  <meta content="Project Detail on GOLDSCHMIDT LEVI. A high-precision, brutalist digital portfolio for architects to showcase their." name="twitter:description">
+  <meta content="https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png/v1/fill/w_1200,h_630/d0fd4840f_logo.png" name="twitter:image">
+  <meta content="summary_large_image" name="twitter:card">
+  <meta content="https://goldschmidt-levi.base44.app/project/6a47ce0ed4bceb4a3fd2a756" name="twitter:url">
+  <script>
+   (function () {
+  var titles = {"/": "GOLDSCHMIDT LEVI", "/projets": "ArchiMonograph", "/contact": "Contact | GOLDSCHMIDT LEVI", "/photos": "Photos | GOLDSCHMIDT LEVI", "/videos": "Videos | GOLDSCHMIDT LEVI", "/smartrun": "Smart Run | GOLDSCHMIDT LEVI", "/cv": "GOLDSCHMIDT LEVI"};
+  // PascalCase boundaries -> "-", mirroring _PASCAL_BOUNDARY_RE without lookbehind
+  // (old Safari fails to PARSE a lookbehind, taking the whole script down).
+  var dashed = function (s) {
+    return s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/([A-Z])([A-Z][a-z])/g, "$1-$2");
+  };
+  var decode = function (s) {
+    // A %2F inside ONE segment must not become a structural separator: /blog/foo%2Fbar is a
+    // dynamic slug, and letting it split would match a static /blog/foo/bar and write ITS title.
+    try { var d = decodeURIComponent(s); return d.indexOf("/") < 0 ? d : s; } catch (e) { return s; }
+  };
+  var segments = function (path) { return path.split("/").filter(Boolean).map(decode); };
+  var norm = function (path) {
+    var parts = segments(path).map(function (s) { return dashed(s).toLowerCase(); });
+    return parts.length ? "/" + parts.join("/") : "/";
+  };
+  var lastPath = location.pathname, written = document.title, on = true;
+  var sync = function () {
+    // Path only: a hash/query change is the same page, and the SDK strips its own auth
+    // params with replaceState -- neither must clobber a server-rendered title in place.
+    if (!on || location.pathname === lastPath) return;
+    lastPath = location.pathname;
+    if (document.title !== written) { on = false; return; }
+    // Write ONLY a title the map proves. An unmapped path is a dynamic route (/blog/:slug) the
+    // map cannot carry, and writing a placeholder there is destructive, not merely vague: the
+    // prerender worker runs no setUserAgent, so its capture browser reads as human and executes
+    // this script, and coordinator.js's settle wait explicitly tolerates a full navigation --
+    // a redirect landing on an unmapped path would bake the placeholder into the stored
+    // snapshot. Leaving the title alone degrades to today's behavior instead.
+    // Exact lookup only. A dash-stripped retry here would let a genuinely different /set-up
+    // claim /setup: the map carries a dash-free key only where a PascalCase boundary put the
+    // dashes there, and the client cannot tell the two apart. The map emits every reachable
+    // shape per segment instead (_client_url_variants).
+    var title = titles[norm(location.pathname)];
+    if (title === undefined) return;
+    document.title = title;
+    // Re-read: the setter stores verbatim but the getter strips and collapses whitespace, so
+    // keeping the assigned string would make the next sync() read our own write as the app's.
+    written = document.title;
+  };
+  var wrap = function (fn) {
+    // The history entry is already pushed by the time sync() runs, so a throw here would
+    // surface inside the host app's router and break navigation. This is injected into apps
+    // we cannot test, so it swallows rather than trusting the trace.
+    return function () {
+      var r = fn.apply(this, arguments);
+      try { sync(); } catch (e) {}
+      return r;
+    };
+  };
+  history.pushState = wrap(history.pushState);
+  history.replaceState = wrap(history.replaceState);
+  window.addEventListener("popstate", sync);
+})();
+  </script>
+  <meta content="yes" name="mobile-web-app-capable">
+  <meta content="black" name="apple-mobile-web-app-status-bar-style">
+  <meta content="GOLDSCHMIDT LEVI" name="apple-mobile-web-app-title">
+  <link href="https://goldschmidt-levi.base44.app/project/6a47ce0ed4bceb4a3fd2a756" rel="canonical">
+  <script data-seo-source="builder" type="application/ld+json">
+   {"name": "GOLDSCHMIDT LEVI", "@context": "https://schema.org", "@type": "WebSite", "url": "https://goldschmidt-levi.base44.app"}
+  </script>
+  <script data-seo-source="builder" type="application/ld+json">
+   {"name": "GOLDSCHMIDT LEVI", "logo": "https://media.base44.com/images/public/6a188961cb313af9686e2905/d0fd4840f_logo.png", "@context": "https://schema.org", "@type": "Organization", "url": "https://goldschmidt-levi.base44.app"}
+  </script>
+  <script data-seo-source="builder" type="application/ld+json">
+   {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://goldschmidt-levi.base44.app/"}, {"@type": "ListItem", "position": 2, "name": "project", "item": "https://goldschmidt-levi.base44.app/project"}, {"@type": "ListItem", "position": 3, "name": "Project Detail", "item": "https://goldschmidt-levi.base44.app/project/6a47ce0ed4bceb4a3fd2a756"}]}
+  </script>
+  <script async="true" data-app-id="6a188961cb313af9686e2905" data-platform-url="https://app.base44.com" src="/static/js/badge.js">
+  </script>
+ </head>
+ <body>
+  <div id="root"><div class="min-h-screen bg-background text-foreground"><header class="fixed top-0 left-0 right-0 z-50 bg-background"><div class="flex flex-col items-center pt-3 pb-1 px-[6vw]"><a class="font-display tracking-[0.15em] md:tracking-[0.25em] uppercase text-2xl" href="/">GOLDSCHMIDT LEVI</a><nav class="flex items-center justify-center mt-3 gap-6"><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-foreground" href="/projets">PROJETS</a><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-muted-foreground" href="/photos">PHOTOS</a><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-muted-foreground" href="/videos">VIDÉOS</a><a class="font-display text-[11px] md:text-[13px] tracking-[0.15em] click-anim text-muted-foreground" href="/cv">CV</a></nav></div></header><main class="pt-[80px]"><div><div class="px-[6vw] py-4 flex items-center"><a class="inline-flex items-center gap-2 font-display text-xs tracking-[0.15em] click-anim" href="/projets"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left w-3 h-3"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>RETOUR</a></div><div class="w-full relative"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/29603852b_elementsgraphique_6.png" alt="S1 Projet 5" class="w-full max-h-[70vh] object-contain grayscale"></div><div class="px-[6vw] pt-12 pb-6 md:pb-12 text-center"><h1 class="font-display text-2xl md:text-4xl tracking-[0.1em] uppercase font-medium">S1 Projet 5</h1><div class="mt-4"><p class="font-display text-[10px] tracking-[0.2em] text-foreground">ARCHITECTURE — 2026</p></div></div><div style="opacity: 1;"><div class="px-[6vw] py-2"><nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-1"><a href="#texte" class="font-display text-[11px] tracking-[0.12em] uppercase click-anim text-foreground">Texte</a><a href="#process" class="font-display text-[11px] tracking-[0.12em] uppercase click-anim text-muted-foreground">Processus / Croquis</a><a href="#plans" class="font-display text-[11px] tracking-[0.12em] uppercase click-anim text-muted-foreground">Plans &amp; Coupes</a><a href="#pdfs" class="font-display text-[11px] tracking-[0.12em] uppercase click-anim text-muted-foreground">PDF</a></nav></div></div><div id="texte" class="scroll-mt-[115px]"><section class="px-[6vw] py-12"><div class="mb-8"><span class="font-display text-sm tracking-[0.2em] uppercase">Texte</span></div><p class="font-display text-base leading-relaxed text-foreground whitespace-pre-line text-justify">Objectifs : Concevoir une extension contemporaine sous forme de logement sur le toit d'un bâtiment existant au cœur de la cité-jardin historique de la Butte-Rouge, à Châtenay-Malabry. Le projet commence par un travail d'observation en duo et de dessin sur place pour comprendre le quartier, son histoire et son architecture. L'objectif est d'étudier le passage de la rue à l'espace privé de l'habitat, puis d'imaginer un nouveau lieu de vie moderne qui s'intègre au-dessus d'un bâtiment existant tout en respectant son cadre naturel et patrimonial.
+
+Concept : Analyse de l'édifice existant et réflexion sur l'aménagement intérieur à travers la composition des façades et le travail des ouvertures. Le projet développe un duplex destiné à une famille de cinq enfants, ceinturé de terrasses périphériques pour offrir un prolongement extérieur généreux à l'ensemble des espaces de vie.
+
+Durée : 3 semaines
+
+Note : 15/20 (Meilleure note)</p></section></div><div><div id="process" class="scroll-mt-[115px]"><section class="px-[6vw] py-12"><div class="mb-8"><span class="font-display text-sm tracking-[0.2em] uppercase">Processus / Croquis</span></div><div class="hidden md:grid grid-cols-5 gap-2"><div class="overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/ec4475a12_Releverbatiment_1.png" alt="Processus / Croquis 1" loading="lazy" decoding="async" class="w-full transition-transform duration-500 ease-out hover:scale-[1.03] grayscale"></div><div class="overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/46c6b580d_Releverbatiment_2.png" alt="Processus / Croquis 2" loading="lazy" decoding="async" class="w-full transition-transform duration-500 ease-out hover:scale-[1.03] grayscale"></div><div class="overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/1b29934c6_coupeurbaine.png" alt="Processus / Croquis 3" loading="lazy" decoding="async" class="w-full transition-transform duration-500 ease-out hover:scale-[1.03] grayscale"></div><div class="overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/955049a59_facadeGAUCHEDROITEAVANT.png" alt="Processus / Croquis 4" loading="lazy" decoding="async" class="w-full transition-transform duration-500 ease-out hover:scale-[1.03] grayscale"></div></div><div class="md:hidden select-none overflow-hidden"><div class="relative"><div class=""><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/ec4475a12_Releverbatiment_1.png" alt="Processus / Croquis 1" class="w-full grayscale"></div><button type="button" aria-label="Image précédente" class="absolute z-30 top-1/2 -translate-y-1/2 p-2.5 text-foreground opacity-40 hover:opacity-90 active:opacity-90 transition-opacity cursor-pointer touch-manipulation left-1 md:left-4 "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left w-5 h-5 md:w-6 md:h-6"><path d="m15 18-6-6 6-6"></path></svg></button><button type="button" aria-label="Image suivante" class="absolute z-30 top-1/2 -translate-y-1/2 p-2.5 text-foreground opacity-40 hover:opacity-90 active:opacity-90 transition-opacity cursor-pointer touch-manipulation right-1 md:right-4 "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-5 h-5 md:w-6 md:h-6"><path d="m9 18 6-6-6-6"></path></svg></button></div><div class="font-display text-[10px] tracking-[0.2em] text-foreground mt-2 text-center">1 / 4</div></div></section></div><div id="plans" class="scroll-mt-[115px]"><section class="px-[6vw] py-12"><div class="mb-8"><span class="font-display text-sm tracking-[0.2em] uppercase">Plans &amp; Coupes</span></div><div class="hidden md:grid grid-cols-5 gap-2"><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/54f5aed34_elementsgraphique_1.png" alt="Plans &amp; Coupes 1" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/3eba0927a_elementsgraphique_2.png" alt="Plans &amp; Coupes 2" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/f6ca0edc8_elementsgraphique_3.png" alt="Plans &amp; Coupes 3" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/eff08720e_elementsgraphique_4.png" alt="Plans &amp; Coupes 4" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/5f81e671e_elementsgraphique_5.png" alt="Plans &amp; Coupes 5" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/29603852b_elementsgraphique_6.png" alt="Plans &amp; Coupes 6" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/4d2541023_elementsgraphique_7.png" alt="Plans &amp; Coupes 7" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/506d6258b_elementsgraphique_8.png" alt="Plans &amp; Coupes 8" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/932264ab3_elementsgraphique_9.png" alt="Plans &amp; Coupes 9" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/1f56f3747_elementsgraphique_10.png" alt="Plans &amp; Coupes 10" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/4e3bd889a_Analyse_LviGOLDSCHMIDTAxelPENNE_10_1.png" alt="Plans &amp; Coupes 11" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/c5ca56c35_Analyse_LviGOLDSCHMIDTAxelPENNE_10_2.png" alt="Plans &amp; Coupes 12" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/e42125cb7_Analyse_LviGOLDSCHMIDTAxelPENNE_10_3.png" alt="Plans &amp; Coupes 13" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/721fbce72_Analyse_LviGOLDSCHMIDTAxelPENNE_10_4.png" alt="Plans &amp; Coupes 14" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/1ba86a0e0_Analyse_LviGOLDSCHMIDTAxelPENNE_10_5.png" alt="Plans &amp; Coupes 15" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/2a0ce1d9e_Analyse_LviGOLDSCHMIDTAxelPENNE_10_6.png" alt="Plans &amp; Coupes 16" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/3f099c076_Analyse_LviGOLDSCHMIDTAxelPENNE_10_7.png" alt="Plans &amp; Coupes 17" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div><div class="overflow-hidden"><div class="w-full aspect-video overflow-hidden"><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/a95055304_Analyse_LviGOLDSCHMIDTAxelPENNE_10_8.png" alt="Plans &amp; Coupes 18" loading="lazy" decoding="async" class="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-[1.03]"></div></div></div><div class="md:hidden select-none overflow-hidden"><div class="relative"><div class="w-full aspect-video overflow-hidden"><div class="w-full h-full "><img src="https://media.base44.com/images/public/6a188961cb313af9686e2905/54f5aed34_elementsgraphique_1.png" alt="Plans &amp; Coupes 1" class="w-full h-full object-cover"></div></div><button type="button" aria-label="Image précédente" class="absolute z-30 top-1/2 -translate-y-1/2 p-2.5 text-foreground opacity-40 hover:opacity-90 active:opacity-90 transition-opacity cursor-pointer touch-manipulation left-1 md:left-4 "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left w-5 h-5 md:w-6 md:h-6"><path d="m15 18-6-6 6-6"></path></svg></button><button type="button" aria-label="Image suivante" class="absolute z-30 top-1/2 -translate-y-1/2 p-2.5 text-foreground opacity-40 hover:opacity-90 active:opacity-90 transition-opacity cursor-pointer touch-manipulation right-1 md:right-4 "><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-5 h-5 md:w-6 md:h-6"><path d="m9 18 6-6-6-6"></path></svg></button></div><div class="font-display text-[10px] tracking-[0.2em] text-foreground mt-2 text-center">1 / 18</div></div></section></div><div id="pdfs" class="scroll-mt-[115px]"><section class="px-[6vw] py-12"><div class="mb-8"><span class="font-display tracking-[0.2em] uppercase text-lg">PDF</span></div><div class="flex flex-col gap-3"><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between px-4 py-3 hover:bg-muted transition-colors cursor-pointer"><div class="flex items-center gap-3 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4 shrink-0 text-foreground"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg><span class="font-display text-xs tracking-[0.1em] break-all">rendu31.pdf</span></div><div class="flex items-center gap-4 shrink-0"><button class="flex items-center gap-2 font-display text-[10px] tracking-[0.15em] opacity-50 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3 h-3"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>VOIR</button><button class="flex items-center gap-2 font-display text-[10px] tracking-[0.15em] opacity-50 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-3 h-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>TÉLÉCHARGER</button></div></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between px-4 py-3 hover:bg-muted transition-colors cursor-pointer"><div class="flex items-center gap-3 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text w-4 h-4 shrink-0 text-foreground"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg><span class="font-display text-xs tracking-[0.1em] break-all">analyse_lvigoldschmidtaxelpenne.pdf</span></div><div class="flex items-center gap-4 shrink-0"><button class="flex items-center gap-2 font-display text-[10px] tracking-[0.15em] opacity-50 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye w-3 h-3"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>VOIR</button><button class="flex items-center gap-2 font-display text-[10px] tracking-[0.15em] opacity-50 hover:opacity-100 transition-opacity"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-3 h-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>TÉLÉCHARGER</button></div></div><div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between px-4 py-3 hover:bg-muted transition-colors"><div class="flex items-center gap-3 min-w-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-4 h-4 shrink-0 text-foreground"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg><span class="font-display text-xs tracking-[0.1em] break-all">toutes les images (zip)</span></div><button class="flex items-center gap-2 font-display text-[10px] tracking-[0.15em] opacity-50 hover:opacity-100 transition-opacity disabled:opacity-50"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download w-3 h-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>TÉLÉCHARGER</button></div></div></section></div></div></div></main></div><div class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]"><div class="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]"></div></div></div>
+ 
+
+<div id="base44-edit-badge" dir="ltr" style="position: fixed; z-index: 999999; bottom: 16px; right: 16px; display: flex; align-items: center; gap: 8px; background-color: rgb(0, 0, 0); color: rgb(255, 255, 255); padding: 8px 12px; border-radius: 6px; box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px; cursor: pointer; transition: box-shadow 0.2s; border: 1px solid rgb(38, 38, 38); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif; font-size: 14px;">
+      <img src="https://media.base44.com/images/public/builder-assets/symbol-orange.png" alt="base44" style="width: 20px; height: 20px;">
+      <span style="white-space: nowrap; font-size: 12px;">
+        <span id="badge-content">
+          <div style="display: flex; align-items: center; gap: 6px; justify-content: center; font-size: 14px;">
+            <span>Edit with </span>
+            <span style="margin-bottom: 2px;"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARAAAABECAMAAAB+vJpyAAAACXBIWXMAACxLAAAsSwGlPZapAAAAAXNSR0IArs4c6QAAAEVQTFRFAAAA////////////////////////////////////////////////////////////////////////////////////////Up1zwgAAABZ0Uk5TABAgMEBQX2BvcH+Aj5CfoK+wv8/f741pbhwAAAVHSURBVHja7ZvtbuwoDECNQ5ZNSZgsAd7/Ufeq6i0Ex3Y6I1WJNOdv3RlyGvAHKrx58+bNmzdvfg0v4OwAN8P5BnH16FsM/KUoxNnCffi3tDgQCKUFqxCd5OAmYCFCdHVUiE5CuAXptBDMohCdD7gBczktJBVVyP2NuNLhBHWaEB0LFwcTESKoe11IMnBtYulxvDpdiI6HS/NRCE5UpwvJqaX05ItnXIoT1elCPOwY3HqfU8QkTQhVpwtRNtsE1yUUTQhVpwtR6pdwi5I9KUJCeUUI+FKJcFUwVx+eCOHULVETomy4dIOSPSMRwqqDZ4QAEXLtjDuBLCQ1Dp4TkoQtg25ev/Jziqu30EAD81fcZIHFjDVwdginsO0xR4Rw6jw8JySXb/6DFvORSs/qgEIDU7CHNlzsAyf8UcmeUBYytn/d54QYJu1iODk7MXMuB8SBHneHgQF/kHFHIEJYdU8KsaUyCIuvzAYabBbjKsNWTimWd4EsZO1+pAqR9ad2EQKbOReYEFTD+uQB2wUSIZy6BX4shD6Q0x6THr5O6Z9PfmI4V7IjEcKqM88JMfNh0h2KwlSTvkjQfOjvyEyWT4Rw6nQhwba4OZaGjMz4bQuLDzHvYs1BlZw+42i7SA3nLcat7Bj1Sc8KVAirThWiM7a5q/J9oeESedewlT0cxcWDdusrJaNLRLGccRkhVF2E14Vke9wdWag8+u3lDncjbqVi+gFnsjVwUadTkTw8FUJLdnxdSESoZG6ZW/f5ayuoYvJ+ydhlqIonr4iQNmQhpAc+LUQtjpCdoTk2zQdo8XujgZ/bRuKeTRusEKruJSFUiWWbG9N968YEDumbpeu3+N40itMrBFGIJerOC9EzH35j2M44dN9nz7ZmfG1phJrRAyuEqntJCNneEtj1ges+dzAsjLY+ozl+0hOBF0LV6UJeN4LjFLbc59OptOQ4j4OYKbLoeOEnPcgJEdXpQrawY41Zr6CNneaYS0+sm0Gz0k7/KN1Lx6QNUQgWRt0TvYx9lBZLhzlCO1O/kFqx5B1QSVzGDSAKMaw6XYh265daG1Hv72xhSQGBjdGFjCRtsEJmou5pIbSutqRbF4WA1/OWLWdhGzVRiCPqXhBCVrzU6lsVohvZ8FkhWE7hyAo0BCGV3L+2Qy5nhYBLYt66pZC1VAzrI62LOxAC+BD0zbcU8igV/D5mK3kLkzXwh+N8b9yaCoMFvLmQbroVlxHhCyqkMox+3QplAUN+ieOSWwb3N1cWGtRnM3Z6dFZy+3npJkJSqRgYSc6R+2Cl2MPWN95CiN3/wsKvP+yFYMWwxZ6FSVoAVsxVhHQz0JV9C3AfCCv7Lk3MqZqN8JH2GkJM2J+BEFkhWyek2Rob+5x2Vy/O/IwwQwvyLHshBnmaFVv8RBNiPnLf3a1ctx5KJ2Ri20K7ux4d2QuY4dRllVS6S+ile/Q7wpoO+qsHc/m9kUrV0GtL6q5uSmrkn0yU/pqQ83tyOlr9MOeD0j0eX1mbWZib1EAbySzmakISuWXLq3duCunMgGibLP5hnDO5L166cUnwYe0M41WE0Nc+ChFkQKSQajcvM8H1hORBm+gkR+8oZbBWJiIeriOEHosLa8xWIcKDkgWrgR6uJ2Qx9VDcGB9AhIgPmh1UzEOKu5YQ2sUtzPUvFQLgtftibZS0IlxLSI6TASCLp8aOhQA+EqtYVZKDBfhdIVFgDd4NBo5wTV5Mi4VPhviXuWtwt04xwiF2aQNTcAZ+jIvfaDKXGmrgdYZx8t670ZyMdv4Pk7MIEsaO02fcYN7/Zf7mzfX5H+WZeZXgxfH6AAAAAElFTkSuQmCC" alt="Base44" height="18" width="56"></span>
+          </div>
+        </span>
+      </span>
+      <button id="badge-close" aria-label="Close badge" style="
+          padding: 2px;
+          margin-left: 2px;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div></body></html>
