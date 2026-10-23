@@ -218,3 +218,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Portfolio: generated output and the legacy Base44 capture (kept locally only)
+/site/
+/.cache/
+/archive/
+/snapshots/
+/manifest.json
+/preview.png
