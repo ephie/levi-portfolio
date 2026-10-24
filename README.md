@@ -36,9 +36,12 @@ static/css, js  ─┘
 source .venv/bin/activate          # or: python3 -m venv .venv && pip install -r requirements.txt
 # 1. edit content/*.json and add files to media/
 python build_site.py               # 2. rebuild site/
-python -m http.server -d site 8000 # 3. open http://127.0.0.1:8000/
+.venv/bin/python -m http.server --directory site 8000   # 3. open http://127.0.0.1:8000/
 ```
 
+To run the already-built website locally, without rebuilding it, only run the
+last command (the `site/` folder must exist) and open
+<http://127.0.0.1:8000/>. Press `Ctrl+C` to stop the server.
 - **Adding a project:** copy a project block in `content/projects.json`,
   give it a unique `slug`, and put its images in `media/projets/<slug>/`.
 - **Image thumbnails:** they are cached in `.cache/`. The first build takes a
@@ -104,10 +107,6 @@ To update the site later, edit `content/` or `media/`, then `git commit` and
 - Enable **Enforce HTTPS**.
 
 **Notes:**
-- `archive/` and `snapshots/` are git-ignored: they are the large legacy
-  Base44 capture and aren't needed to build the site. If they were already
-  committed, stop tracking them (the files stay on disk) with
-  `git rm -r --cached archive snapshots manifest.json preview.png`.
 - GitHub Pages limits a site to 1 GB and each file to 100 MB; this site is
   about 500 MB and its largest file is under 50 MB. Don't enable
   `--global-zip` in the workflow, because that ZIP is about 250 MB.
@@ -123,95 +122,3 @@ To update the site later, edit `content/` or `media/`, then `git commit` and
   have the files.
 - **Empty project:** "S2 Projet 1 : the room" has no content on the original
   site either, so it shows "CONTENU À VENIR".
-
-## Legacy tools
-
-`tools/export_content.py` generated `content/` and `media/` once from the
-Base44 archive below. Running it again **overwrites** your edits. The archive
-files (`archive/`, `snapshots/`, `manifest.json`, `download_site.py`,
-`serve.py`, `mirror-sw.js`, `index.html`, `preview.png`) are only kept for
-reference and can be deleted once you are happy with the static site.
-
-# Legacy: Base44 archive
-
-Public browser-delivered files captured with Python Playwright from
-<https://goldschmidt-levi.base44.app/> on 2026-10-23, with the owner's permission.
-
-### Open the local website
-
-From this folder:
-
-```sh
-source .venv/bin/activate
-python serve.py
-```
-
-Open <http://127.0.0.1:8000/>. Stop the server with Ctrl+C.
-Use `python serve.py --port 8001` if port 8000 is occupied.
-
-The preview requires this server, not opening `index.html` directly or using
-`python -m http.server`. A service worker routes the original application's
-resource requests to the local archive. Media URLs are rewritten when served so
-PDF viewers, new tabs and downloads also stay local. Saved original files are
-not modified.
-
-### Contents
-
-- `archive/`: 532 resources, including the production JavaScript/CSS, public
-  API responses, images, fonts, 23 PDFs and one MP4.
-- `snapshots/`: rendered HTML snapshots of 19 routes: home, projects, photos,
-  videos, CV and 14 project detail pages.
-- `manifest.json`: original URL to local file mappings, page inventory and
-  exact resource download failures.
-- `preview.png`: full-page screenshot of the original homepage.
-- `download_site.py`: reusable Playwright capture script.
-- `serve.py`, `mirror-sw.js`, `index.html`: read-only local preview.
-- `.venv/`, `requirements.txt`: project-local Python environment and pinned
-  Playwright dependency.
-
-### Recreate the environment or refresh the capture
-
-```sh
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m playwright install chromium
-python download_site.py
-```
-
-The capture revisits public linked pages and downloads their resources,
-including media referenced in public JSON responses and JavaScript. Previously
-saved resources are reused when not requested again by the browser.
-Stop and restart the preview after refreshing its manifest.
-
-### Scope and known limitations
-
-This is a functional public frontend archive, not the original editable
-React/Base44 project or its server-side source. No account credentials or
-private/admin pages were accessed. The local server makes no upstream requests;
-write requests, including analytics, are explicitly rejected with HTTP 405.
-Outbound links to other websites are not archived.
-
-Two publicly referenced PDFs returned HTTP 403 on the source website, including
-on retry, and could not be downloaded:
-
-- `82637d3bf_MAEUProjectfinalpresentation.pdf`
-- `a6182fb28_StatiqueAvecFrottementsLviGOLDSCHMIDTLevi1er7.pdf`
-
-Their exact original URLs are listed in `manifest.json`. No access controls
-were bypassed. Those document links remain unavailable locally.
-
-YouTube thumbnails are saved, but YouTube-hosted streams and players are not
-included. Embedded YouTube playback is therefore unavailable in this offline
-archive. The site's directly hosted MP4 is included and plays locally.
-
-The original site has an empty cover image URL for "S2 Projet 1 : the room";
-that original issue is preserved.
-
-### Verification
-
-Using Python Playwright with upstream requests blocked, all 19 local routes
-matched the rendered main content of their saved snapshots. All nonempty main
-image URLs decoded successfully; the CV download produced a valid PDF, and
-the archived MP4 played successfully. No JavaScript exceptions or upstream
-requests occurred during those checks.

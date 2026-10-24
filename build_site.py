@@ -4,7 +4,7 @@
     python build_site.py                 # content/ + media/ + static/  ->  site/
     python build_site.py --base-url https://example.com/
     python build_site.py --global-zip    # also add the big all-images ZIP
-    python -m http.server -d site 8000   # preview
+    .venv/bin/python -m http.server --directory site 8000   # preview
 
 Only the Python standard library is required. If Pillow is installed, lightweight
 WebP thumbnails are generated for the grids (cached in .cache/), otherwise the
